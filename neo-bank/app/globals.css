@@ -1,0 +1,302 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ─── */
+:root {
+  --bg-void: #0B0F19;
+  --bg-surface: rgba(15, 20, 35, 0.65);
+  --bg-glass: rgba(20, 28, 50, 0.45);
+  --neon-cyan: #00F2FE;
+  --neon-violet: #4FACFE;
+  --neon-pink: #E040FB;
+  --neon-red: #FF3D71;
+  --text-primary: #E8ECF4;
+  --text-muted: rgba(232, 236, 244, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 16px;
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --font-sans: "Inter", "Geist", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "JetBrains Mono", monospace;
+}
+
+@theme inline {
+  --color-background: var(--bg-void);
+  --color-foreground: var(--text-primary);
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-violet: var(--neon-violet);
+  --color-neon-pink: var(--neon-pink);
+  --color-neon-red: var(--neon-red);
+  --color-glass-bg: var(--bg-glass);
+  --color-glass-border: var(--glass-border);
+  --color-surface: var(--bg-surface);
+  --color-text-muted: var(--text-muted);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+/* ─── Global Reset ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 242, 254, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 242, 254, 0.4);
+}
+
+/* ─── Glassmorphism Base (Tailwind v4 Native Backdrop Utilities) ─── */
+.glass {
+  background: rgba(2, 6, 23, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-lg);
+}
+
+.glass-sm {
+  background: rgba(2, 6, 23, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-md);
+}
+
+/* ─── Neon Glow Utilities ─── */
+.glow-cyan {
+  box-shadow:
+    0 0 15px rgba(0, 242, 254, 0.15),
+    0 0 40px rgba(0, 242, 254, 0.08),
+    inset 0 0 20px rgba(0, 242, 254, 0.03);
+}
+
+.glow-violet {
+  box-shadow:
+    0 0 15px rgba(79, 172, 254, 0.15),
+    0 0 40px rgba(79, 172, 254, 0.08),
+    inset 0 0 20px rgba(79, 172, 254, 0.03);
+}
+
+.glow-red {
+  box-shadow:
+    0 0 20px rgba(255, 61, 113, 0.3),
+    0 0 60px rgba(255, 61, 113, 0.15),
+    inset 0 0 30px rgba(255, 61, 113, 0.05);
+}
+
+/* ─── Neon Text Glow ─── */
+.text-glow-cyan {
+  text-shadow: 0 0 10px rgba(0, 242, 254, 0.5), 0 0 30px rgba(0, 242, 254, 0.2);
+}
+
+.text-glow-violet {
+  text-shadow: 0 0 10px rgba(79, 172, 254, 0.5), 0 0 30px rgba(79, 172, 254, 0.2);
+}
+
+/* ─── Input Styling ─── */
+.neo-input {
+  background: rgba(15, 20, 35, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  padding: 16px 16px 8px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.neo-input:focus {
+  border-color: rgba(0, 242, 254, 0.4);
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.1), inset 0 0 8px rgba(0, 242, 254, 0.02);
+}
+
+.neo-input::placeholder {
+  color: transparent;
+}
+
+/* ─── Floating Label ─── */
+.float-label {
+  position: relative;
+}
+
+.float-label label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--font-sans);
+}
+
+.float-label .neo-input:focus ~ label,
+.float-label .neo-input:not(:placeholder-shown) ~ label {
+  top: 6px;
+  transform: translateY(0);
+  font-size: 0.65rem;
+  color: var(--neon-cyan);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ─── Keyframes ─── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes shatter-in {
+  0% { opacity: 0; transform: scale(0.8) rotate(-2deg); }
+  50% { opacity: 1; transform: scale(1.02) rotate(0.5deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes grid-flow {
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 50px; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-shatter-in {
+  animation: shatter-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─── Background Grid Pattern ─── */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-flow 20s linear infinite;
+}
+
+/* ─── Gradient Borders ─── */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.3), rgba(79, 172, 254, 0.1), transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ─── PIN Dots ─── */
+.pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pin-dot.filled {
+  background: var(--neon-cyan);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+}
+
+.pin-dot.error {
+  background: var(--neon-red);
+  border-color: var(--neon-red);
+  box-shadow: 0 0 10px rgba(255, 61, 113, 0.4);
+}
+
+/* ─── Transaction History ─── */
+.tx-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.2s ease;
+}
+.tx-item:hover {
+  background: rgba(0, 242, 254, 0.03);
+}
+.tx-item:last-child {
+  border-bottom: none;
+}
+
+/* ─── Shatter overlay ─── */
+.shatter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 61, 113, 0.15) 0%,
+    rgba(11, 15, 25, 0.95) 70%
+  );
+  pointer-events: all;
+}
+
+/* ─── Utility ─── */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
