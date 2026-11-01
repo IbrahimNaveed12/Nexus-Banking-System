@@ -27,7 +27,7 @@ export default function GlassCard({
       animate={animate ? { opacity: 1, y: 0, scale: 1 } : false}
       exit={animate ? { opacity: 0, y: -20, scale: 0.96 } : undefined}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={`glass gradient-border backdrop-blur-xl bg-slate-950/40 border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)] ${glowClass} ${className}`}
+      className={`glass gradient-border backdrop-blur-xl max-md:backdrop-blur-none bg-slate-950/40 max-md:bg-slate-950/90 border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)] ${glowClass} ${className}`}
       {...props}
     >
       {children}

@@ -7,21 +7,25 @@ import * as THREE from "three";
 /**
  * Background particle field that assembles into a geometric shape
  * during signup as the user types their deposit amount.
+ * - Mobile: Throttled to 300 particles (50% reduction for mobile GPU load).
+ * - Desktop: 600 particles.
  */
-export default function ParticleField({ assembleProgress = 0, color = "#00F2FE" }) {
+export default function ParticleField({
+  assembleProgress = 0,
+  color = "#00F2FE",
+  isMobile = false,
+}) {
   const ref = useRef();
-  const count = 600;
+  const count = isMobile ? 300 : 600;
 
   const { randomPositions, targetPositions } = useMemo(() => {
     const rand = new Float32Array(count * 3);
     const target = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      // Random scattered positions
       rand[i * 3] = (Math.random() - 0.5) * 20;
       rand[i * 3 + 1] = (Math.random() - 0.5) * 14;
       rand[i * 3 + 2] = (Math.random() - 0.5) * 10;
 
-      // Target: icosahedron surface
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
       const r = 2.5 + Math.random() * 0.3;
@@ -30,13 +34,16 @@ export default function ParticleField({ assembleProgress = 0, color = "#00F2FE" 
       target[i * 3 + 2] = r * Math.cos(phi);
     }
     return { randomPositions: rand, targetPositions: target };
-  }, []);
+  }, [count]);
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(count * 3), 3));
+    geo.setAttribute(
+      "position",
+      new THREE.BufferAttribute(new Float32Array(count * 3), 3)
+    );
     return geo;
-  }, []);
+  }, [count]);
 
   useFrame((_, delta) => {
     if (!ref.current) return;
@@ -46,7 +53,6 @@ export default function ParticleField({ assembleProgress = 0, color = "#00F2FE" 
 
     for (let i = 0; i < count; i++) {
       const ri = i * 3;
-      // Lerp between random and target based on assembleProgress
       const lerpSpeed = 1.5 * dt;
       const tx = randomPositions[ri] * (1 - t) + targetPositions[ri] * t;
       const ty = randomPositions[ri + 1] * (1 - t) + targetPositions[ri + 1] * t;
@@ -57,7 +63,6 @@ export default function ParticleField({ assembleProgress = 0, color = "#00F2FE" 
     }
     positions.needsUpdate = true;
 
-    // Gentle rotation
     ref.current.rotation.y += dt * 0.15;
   });
 
@@ -65,7 +70,7 @@ export default function ParticleField({ assembleProgress = 0, color = "#00F2FE" 
     <points ref={ref} geometry={geometry}>
       <pointsMaterial
         color={color}
-        size={0.025}
+        size={isMobile ? 0.035 : 0.025}
         transparent
         opacity={0.5}
         sizeAttenuation

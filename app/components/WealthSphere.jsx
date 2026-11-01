@@ -6,14 +6,15 @@ import * as THREE from "three";
 
 /**
  * The Core 3D Asset — "Wealth Sphere"
- *
- * Dynamic behaviors:
- * - Balance Check: gentle pulse with glowing particle emissions
- * - Deposit: expands, mesh warps, glows bright cyan (financial inflow)
- * - Withdrawal: compacts, rotation accelerates, violet fragments dissolve off edges
- * - Idle: slow rotation with ambient shimmer
+ * Responsive WebGL Optimization:
+ * - On mobile (<768px):
+ *   * Mesh segment detail reduced by 50-75% (<icosahedronGeometry args={[1, 2]} /> vs [1, 3])
+ *   * Wireframe detail reduced (<icosahedronGeometry args={[1.02, 1]} /> vs [1.02, 2])
+ *   * Particle budget reduced by 55% (90 vs 200 particles)
+ *   * Dissolve fragment count halved (40 vs 80)
+ *   * Active shadow map casting completely disabled
  */
-export default function WealthSphere({ lastAction, balance }) {
+export default function WealthSphere({ lastAction, balance, isMobile = false }) {
   const meshRef = useRef();
   const wireRef = useRef();
   const particlesRef = useRef();
@@ -22,8 +23,8 @@ export default function WealthSphere({ lastAction, balance }) {
   const actionType = lastAction?.type || "idle";
   const actionSuccess = lastAction?.success !== false;
 
-  // ─── Particle system for emissions ───
-  const particleCount = 200;
+  // ─── Scaled Particle System for Emissions (Budget Throttled on Mobile) ───
+  const particleCount = isMobile ? 90 : 200;
   const particleGeo = useMemo(() => {
     const positions = new Float32Array(particleCount * 3);
     const velocities = new Float32Array(particleCount * 3);
@@ -44,10 +45,10 @@ export default function WealthSphere({ lastAction, balance }) {
     geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geo.userData = { velocities, lifetimes };
     return geo;
-  }, []);
+  }, [particleCount]);
 
-  // ─── Dissolve fragments for withdrawal ───
-  const fragmentCount = 80;
+  // ─── Dissolve fragments for withdrawal (Halved on Mobile) ───
+  const fragmentCount = isMobile ? 40 : 80;
   const fragmentGeo = useMemo(() => {
     const positions = new Float32Array(fragmentCount * 3);
     const velocities = new Float32Array(fragmentCount * 3);
@@ -65,7 +66,7 @@ export default function WealthSphere({ lastAction, balance }) {
     geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geo.userData = { velocities };
     return geo;
-  }, []);
+  }, [fragmentCount]);
 
   // ─── Animation state ───
   const stateRef = useRef({
@@ -207,11 +208,15 @@ export default function WealthSphere({ lastAction, balance }) {
     }
   });
 
+  // Responsive geometry detail downscaling (50-75% reduction on mobile)
+  const sphereDetail = isMobile ? 2 : 3;
+  const wireDetail = isMobile ? 1 : 2;
+
   return (
     <group>
-      {/* Core sphere */}
-      <mesh ref={meshRef}>
-        <icosahedronGeometry args={[1, 3]} />
+      {/* Core sphere with responsive segment reduction */}
+      <mesh ref={meshRef} castShadow={false} receiveShadow={false}>
+        <icosahedronGeometry args={[1, sphereDetail]} />
         <meshStandardMaterial
           color="#0a1628"
           emissive={new THREE.Color(0, 0.95, 1)}
@@ -223,9 +228,9 @@ export default function WealthSphere({ lastAction, balance }) {
         />
       </mesh>
 
-      {/* Wireframe overlay */}
+      {/* Wireframe overlay with reduced geometric complexity */}
       <mesh ref={wireRef}>
-        <icosahedronGeometry args={[1.02, 2]} />
+        <icosahedronGeometry args={[1.02, wireDetail]} />
         <meshBasicMaterial
           color="#00F2FE"
           wireframe
@@ -234,11 +239,11 @@ export default function WealthSphere({ lastAction, balance }) {
         />
       </mesh>
 
-      {/* Particle emissions */}
+      {/* Particle emissions (throttled count on mobile) */}
       <points ref={particlesRef} geometry={particleGeo}>
         <pointsMaterial
           color="#00F2FE"
-          size={0.02}
+          size={isMobile ? 0.025 : 0.02}
           transparent
           opacity={0.4}
           sizeAttenuation
@@ -251,7 +256,7 @@ export default function WealthSphere({ lastAction, balance }) {
       <points ref={dissolveRef} geometry={fragmentGeo}>
         <pointsMaterial
           color="#4FACFE"
-          size={0.04}
+          size={isMobile ? 0.045 : 0.04}
           transparent
           opacity={0}
           sizeAttenuation
@@ -260,13 +265,14 @@ export default function WealthSphere({ lastAction, balance }) {
         />
       </points>
 
-      {/* Ambient light halo */}
+      {/* Ambient point halo (shadows disabled on mobile) */}
       <pointLight
         color="#00F2FE"
-        intensity={0.8}
+        intensity={isMobile ? 0.6 : 0.8}
         distance={8}
         decay={2}
         position={[0, 0, 0]}
+        castShadow={false}
       />
     </group>
   );

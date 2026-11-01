@@ -6,14 +6,14 @@ import * as THREE from "three";
 
 /**
  * Kinetic 3D Backdrop Environment
- * - 1,500 depth-aware stars in 3D coordinate space.
+ * - Desktop: 1,400 depth-aware stars in 3D space.
+ * - Mobile (<768px): Throttled to 800 stars (within 800-1000 mobile budget).
  * - Idle State: Orbital drift & mathematical noise cycle based on clock elapsedTime.
  * - Transaction Hyper-Drive Warp: 1.5s instantaneous acceleration where stars stretch
  *   into elongated cosmic speed-lines and smoothly decelerate back to idle drift.
- * - Mouse-Parallax: Inverted window pointer tracking for spatial separation between
- *   foreground glassmorphic UI and deep space backdrop.
+ * - Mouse-Parallax: Inverted window pointer tracking.
  */
-export default function KineticStarfield({ lastAction }) {
+export default function KineticStarfield({ lastAction, isMobile = false }) {
   const pointsRef = useRef();
   const linesRef = useRef();
 
@@ -50,15 +50,15 @@ export default function KineticStarfield({ lastAction }) {
     }
   }, [lastAction]);
 
-  const count = 1200;
+  // Mobile particle budget throttling: 800 particles on mobile vs 1400 on desktop
+  const count = isMobile ? 800 : 1400;
 
-  // Generate initial particle coordinates and speed attributes
+  // Generate particle coordinates and speed attributes
   const { positions, baseCoords, speeds, colors, linePositions } = useMemo(() => {
     const pos = new Float32Array(count * 3);
     const base = new Float32Array(count * 3);
     const spd = new Float32Array(count);
     const col = new Float32Array(count * 3);
-    // Line segments: 2 vertices per star (head & tail)
     const linePos = new Float32Array(count * 6);
 
     const cyan = new THREE.Color("#00F2FE");
@@ -126,7 +126,6 @@ export default function KineticStarfield({ lastAction }) {
   const lineGeometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
-    // Color per line vertex
     const lineCols = new Float32Array(count * 6);
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
@@ -147,9 +146,8 @@ export default function KineticStarfield({ lastAction }) {
     const dt = Math.min(delta, 0.05);
 
     // ─── 1. Parallax Smoothing ───
-    // Shift opposite to mouse pointer (-state.pointer)
-    parallax.current.targetX = -state.pointer.x * 2.2;
-    parallax.current.targetY = -state.pointer.y * 1.6;
+    parallax.current.targetX = -state.pointer.x * (isMobile ? 1.2 : 2.2);
+    parallax.current.targetY = -state.pointer.y * (isMobile ? 0.9 : 1.6);
     parallax.current.currentX +=
       (parallax.current.targetX - parallax.current.currentX) * dt * 4.0;
     parallax.current.currentY +=
@@ -163,9 +161,7 @@ export default function KineticStarfield({ lastAction }) {
         warpState.current.active = false;
         warpState.current.intensity = 0;
       } else {
-        // Easing: rapid acceleration followed by smooth deceleration
         const progress = elapsedWarp / warpState.current.duration;
-        // Cubic ease-out curve
         const decay = Math.pow(1 - progress, 2.5);
         currentWarp = decay;
         warpState.current.intensity = decay;
@@ -178,7 +174,7 @@ export default function KineticStarfield({ lastAction }) {
     const posAttr = pointsRef.current.geometry.attributes.position;
     const lineAttr = linesRef.current.geometry.attributes.position;
 
-    const warpVelocity = currentWarp * 55.0; // Rapid cosmic speed
+    const warpVelocity = currentWarp * (isMobile ? 40.0 : 55.0);
     const idleSpeed = 0.8;
 
     for (let i = 0; i < count; i++) {
@@ -186,20 +182,16 @@ export default function KineticStarfield({ lastAction }) {
       const i6 = i * 6;
       const starSpeed = speeds[i];
 
-      // Deep space orbital drift + mathematical noise
       const noiseX = Math.sin(time * 0.12 * starSpeed + baseCoords[i3 + 1] * 0.08) * 0.04;
       const noiseY = Math.cos(time * 0.15 * starSpeed + baseCoords[i3] * 0.08) * 0.04;
 
-      // Z-forward movement (idle slow drift + warp burst)
       const forwardMovement = (idleSpeed + warpVelocity) * starSpeed * dt;
       let newZ = posAttr.array[i3 + 2] + forwardMovement;
 
-      // Wrap-around in Z to maintain endless field
       if (newZ > 12) {
         newZ = -55 - Math.random() * 10;
       }
 
-      // Update position with drift and noise
       const newX = baseCoords[i3] + noiseX;
       const newY = baseCoords[i3 + 1] + noiseY;
 
@@ -207,15 +199,12 @@ export default function KineticStarfield({ lastAction }) {
       posAttr.array[i3 + 1] = newY;
       posAttr.array[i3 + 2] = newZ;
 
-      // Speed lines: tail stretches along Z during warp
-      const tailLength = currentWarp > 0.01 ? (0.2 + currentWarp * 7.5 * starSpeed) : 0.01;
+      const tailLength = currentWarp > 0.01 ? (0.2 + currentWarp * (isMobile ? 5.0 : 7.5) * starSpeed) : 0.01;
 
-      // Head
       lineAttr.array[i6] = newX;
       lineAttr.array[i6 + 1] = newY;
       lineAttr.array[i6 + 2] = newZ;
 
-      // Tail trailing behind
       lineAttr.array[i6 + 3] = newX;
       lineAttr.array[i6 + 4] = newY;
       lineAttr.array[i6 + 5] = newZ - tailLength;
@@ -224,7 +213,6 @@ export default function KineticStarfield({ lastAction }) {
     posAttr.needsUpdate = true;
     lineAttr.needsUpdate = true;
 
-    // Apply global orbital sway + mouse parallax to both points and lines
     const orbitalSwayX = Math.sin(time * 0.1) * 0.03;
     const orbitalSwayY = Math.cos(time * 0.08) * 0.03;
 
@@ -244,7 +232,7 @@ export default function KineticStarfield({ lastAction }) {
       {/* Star points (glowing heads) */}
       <points ref={pointsRef} geometry={pointGeometry}>
         <pointsMaterial
-          size={0.065}
+          size={isMobile ? 0.075 : 0.065}
           vertexColors
           transparent
           opacity={0.85}
