@@ -106,7 +106,7 @@ Synthesizes 6 distinct spatial audio cues directly in-browser using the Web Audi
 ### 1. Clone Repository
 ```bash
 git clone https://github.com/your-username/nexus-3d-neobank.git
-cd nexus-3d-neobank/neo-bank
+cd nexus-3d-neobank
 ```
 
 ### 2. Install Dependencies
@@ -138,6 +138,37 @@ npm run start
 
 ---
 
+## 📂 Project Directory Structure
+
+```
+nexus-3d-neobank/
+├── app/
+│   ├── components/
+│   │   ├── DashboardView.jsx     # Spatial dashboard, operations & warning overlay
+│   │   ├── FloatingInput.jsx     # Glassmorphic floating-label input
+│   │   ├── GlassCard.jsx         # Tailwind v4 glassmorphic card container
+│   │   ├── KineticStarfield.jsx  # WebGL 3D dynamic starfield & 1.5s warp speed-lines
+│   │   ├── LoginView.jsx         # Biometric PIN authentication & SVG shatter overlay
+│   │   ├── NeonButton.jsx        # Cyberpunk neon interaction buttons
+│   │   ├── ParticleField.jsx     # Signup icosahedron particle assembly
+│   │   ├── Scene3D.jsx           # R3F Canvas root orchestrator
+│   │   ├── SignupView.jsx        # Dynamic 3-step account onboarding
+│   │   ├── TransactionLog.jsx    # Real-time ledger with unique reconciliation keys
+│   │   └── WealthSphere.jsx      # Morphing 3D wealth sphere with energy pulse
+│   ├── context/
+│   │   └── BankContext.jsx       # State persistence, session storage & business logic
+│   ├── lib/
+│   │   ├── useAudio.js           # Web Audio API 6-tone synthesizer
+│   │   └── useBank.js            # Unified BankContext consumer hook
+│   ├── globals.css               # Design tokens & Tailwind v4 glass utilities
+│   ├── layout.js                 # Root layout with suppressHydrationWarning
+│   └── page.js                   # Client-mounted root orchestrator
+├── README_PORTFOLIO.md           # Professional portfolio documentation
+└── package.json                  # Dependencies & execution scripts
+```
+
+---
+
 ## 📜 License
 
-Distributed under the **MIT License**.
+Distributed under the **MIT License**. See `LICENSE` for details.
